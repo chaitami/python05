@@ -20,18 +20,17 @@ class DataProcessor(ABC):
 class NumericProcessor(DataProcessor):
 
     def process(self, data: Any) -> str:
-        res = "An unexpected error occured"
+        res: str = "An unexpected error occured"
         try:
-            result = f"{len(data)} "
+            result: str = f"{len(data)} "
             result += f"{sum(data)} "
             result += f"{sum(data) / len(data)}"
             res = self.format_output(result)
             if res == "An unexpected error occured":
                 raise Exception(res)
+            return res
         except Exception as e:
             print(e)
-        finally:
-            return res
 
     def validate(self, data: Any) -> bool:
         print(f"Processing data: {data}")
@@ -41,6 +40,7 @@ class NumericProcessor(DataProcessor):
         return True
 
     def format_output(self, result: str) -> str:
+        n1: str; n2: str; n3: str
         n1, n2, n3 = result.split()
         return f"Processed {n1} numeric values, sum={n2}, avg={n3}"
 
@@ -48,17 +48,16 @@ class NumericProcessor(DataProcessor):
 class TextProcessor(DataProcessor):
 
     def process(self, data: Any) -> str:
-        res = "An unexpected error occured"
+        res: str = "An unexpected error occured"
         try:
-            result = f"{len(data)} "
+            result: str = f"{len(data)} "
             result += f"{len(data.split())}"
             res = self.format_output(result)
             if res == "An unexpected error occured":
                 raise Exception(res)
+            return res
         except Exception as e:
             print(e)
-        finally:
-            return res
 
     def validate(self, data: Any) -> bool:
         print(f'Processing data: "{data}"')
@@ -67,6 +66,7 @@ class TextProcessor(DataProcessor):
         return False
 
     def format_output(self, result: str) -> str:
+        nc: str; nw: str
         nc, nw = result.split()
         return f"Processed text: {nc} characters, {nw} words"
 
@@ -74,16 +74,15 @@ class TextProcessor(DataProcessor):
 class LogProcessor(DataProcessor):
 
     def process(self, data: Any) -> str:
-        res = "An unexpected error occured"
+        res: str = "An unexpected error occured"
         try:
 
             res = self.format_output(data)
             if res == "An unexpected error occured":
                 raise Exception(res)
+            return res
         except Exception as e:
             print(e)
-        finally:
-            return res
 
     def validate(self, data: Any) -> bool:
         print(f'Processing data: "{data}"')
@@ -93,13 +92,13 @@ class LogProcessor(DataProcessor):
 
     def format_output(self, result: str) -> str:
         if result.split()[0] == "ERROR:":
-            info = result.removeprefix('ERROR: ')
-            state = result.removesuffix(f": {info}")
-            res = f"[ALERT] {state} level detected: {info}"
+            info: str = result.removeprefix('ERROR: ')
+            state: str = result.removesuffix(f": {info}")
+            res: str = f"[ALERT] {state} level detected: {info}"
         else:
-            info = result.removeprefix('INFO: ')
-            state = result.removesuffix(f": {info}")
-            res = f"[INFO] {state} level detected: {info}"
+            info: str = result.removeprefix('INFO: ')
+            state: str = result.removesuffix(f": {info}")
+            res: str = f"[INFO] {state} level detected: {info}"
         return (res)
 
 
