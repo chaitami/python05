@@ -70,11 +70,12 @@ class SensorStream(DataStream):
             self.warnings += ["Error:" + str(item) for item in humidities
                               if item > 60 or item < 30]
 
-            parts: List[str] = ([f"temp:{item}" for item in temps if item is not None] +
-                     [f"humidity:{item}" for item in humidities
-                      if item is not None] +
-                     [f"pressure:{item}" for item in pressures
-                      if item is not None])
+            parts: List[str] = ([f"temp:{item}" for item in temps
+                                if item is not None] +
+                                [f"humidity:{item}" for item in humidities
+                                if item is not None] +
+                                [f"pressure:{item}" for item in pressures
+                                if item is not None])
 
             return "[" + ", ".join(parts) + "]"
 
@@ -83,9 +84,9 @@ class SensorStream(DataStream):
 
     def filter_data(self, data_batch: List[Any],
                     criteria: Optional[str] = None) -> List[Any]:
-        if criteria is not None:
+        if criteria == "hp":
             return self.warnings
-        return data_batch
+        return super().filter_data(data_batch, criteria)
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
         return {
@@ -124,9 +125,9 @@ class TransactionStream(DataStream):
 
     def filter_data(self, data_batch: List[Any],
                     criteria: Optional[str] = None) -> List[Any]:
-        if criteria is not None:
+        if criteria == "hp":
             return self.warnings
-        return data_batch
+        return super().filter_data(data_batch, criteria)
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
         return {
@@ -153,6 +154,12 @@ class EventStream(DataStream):
                          if str(item).lower() == "error"]
         return "[" + ", ".join(result) + "]"
 
+    def filter_data(self, data_batch: List[Any],
+                    criteria: Optional[str] = None) -> List[Any]:
+        if criteria == "hp":
+            return self.warnings
+        return super().filter_data(data_batch, criteria)
+
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
         return {
                 'nb': self.count,
@@ -178,15 +185,43 @@ class StreamProcessor:
         except Exception as e:
             return f"FAILED: {e}"
 
-    def process_all(self, batches_by_id: Dict[str, List[Any]]) -> List[str]:
-        results: List[str] = [
+    def filter_all(
+        self,
+        batches_by_id: Dict[str, List[Any]],
+        criteria: Optional[str] = None,
+    ) -> Dict[str, List[Any]]:
+
+        return {
+            stream.stream_id: stream.filter_data(
+                batches_by_id.get(stream.stream_id, []),
+                criteria
+            )
+            for stream in self.streams
+        }
+
+    def process_all(
+        self,
+        batches_by_id: Dict[str, List[Any]],
+        criteria: Optional[str] = None,
+        transform: Optional[Any] = None,
+    ) -> List[str]:
+
+        filtered_by_id: Dict[str, List[Any]] = self.filter_all(
+            batches_by_id,
+            criteria
+        )
+
+        return [
             self.safe_process(
                 stream,
-                batches_by_id.get(stream.stream_id, [])
+                [
+                    transform(x) if isinstance(x, str) else x
+                    for x in filtered_by_id.get(stream.stream_id, [])
+                ] if transform is not None
+                else filtered_by_id.get(stream.stream_id, [])
             )
             for stream in self.streams
         ]
-        return results
 
 
 def ft_data_stream() -> None:
