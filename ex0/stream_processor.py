@@ -102,7 +102,7 @@ class LogProcessor(DataProcessor):
         return (res)
 
 
-def ft_stream_processor() -> None:
+def main() -> None:
     print("=== CODE NEXUS - DATA PROCESSOR FOUNDATION ===\n")
 
     data1 = [1, 2, 3, 4, 5]
@@ -157,4 +157,4 @@ def ft_stream_processor() -> None:
 
 
 if __name__ == "__main__":
-    ft_stream_processor()
+    main()

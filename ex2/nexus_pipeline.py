@@ -186,7 +186,7 @@ class NexusManager():
         return data
 
 
-def ft_nexus_pipeline() -> None:
+def main() -> None:
     print("=== CODE NEXUS - ENTERPRISE PIPELINE SYSTEM ===\n")
 
     print("Initializing Nexus Manager...")
@@ -268,4 +268,4 @@ def ft_nexus_pipeline() -> None:
 
 
 if __name__ == "__main__":
-    ft_nexus_pipeline()
+    main()

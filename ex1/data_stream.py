@@ -224,7 +224,7 @@ class StreamProcessor:
         ]
 
 
-def ft_data_stream() -> None:
+def main() -> None:
     print("=== CODE NEXUS - POLYMORPHIC STREAM SYSTEM ===\n")
 
     print("Initializing Sensor Stream...")
@@ -322,4 +322,4 @@ def ft_data_stream() -> None:
 
 
 if __name__ == "__main__":
-    ft_data_stream()
+    main()
