@@ -11,7 +11,7 @@ class DataStream(ABC):
 
     @abstractmethod
     def process_batch(self, data_batch: List[Any]) -> str:
-        raise NotImplementedError
+        ...
 
     def filter_data(self, data_batch: List[Any],
                     criteria: Optional[str] = None) -> List[Any]:
@@ -224,7 +224,7 @@ class StreamProcessor:
         ]
 
 
-def main() -> None:
+def ft_data_stream() -> None:
     print("=== CODE NEXUS - POLYMORPHIC STREAM SYSTEM ===\n")
 
     print("Initializing Sensor Stream...")
@@ -322,4 +322,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    ft_data_stream()
