@@ -40,7 +40,9 @@ class NumericProcessor(DataProcessor):
         return True
 
     def format_output(self, result: str) -> str:
-        n1: str; n2: str; n3: str
+        n1: str
+        n2: str
+        n3: str
         n1, n2, n3 = result.split()
         return f"Processed {n1} numeric values, sum={n2}, avg={n3}"
 
@@ -66,7 +68,8 @@ class TextProcessor(DataProcessor):
         return False
 
     def format_output(self, result: str) -> str:
-        nc: str; nw: str
+        nc: str
+        nw: str
         nc, nw = result.split()
         return f"Processed text: {nc} characters, {nw} words"
 
@@ -102,7 +105,7 @@ class LogProcessor(DataProcessor):
         return (res)
 
 
-def ft_stream_processor() -> None:
+def main() -> None:
     print("=== CODE NEXUS - DATA PROCESSOR FOUNDATION ===\n")
 
     data1 = [1, 2, 3, 4, 5]
@@ -149,12 +152,12 @@ def ft_stream_processor() -> None:
            (TextProcessor(), "hello world!"),
            (LogProcessor(), "INFO: System ready")]
     counter = 1
-    for o, data in all:
-        print(f"Result {counter}: {o.process(data)}")
+    for obj, data in all:
+        print(f"Result {counter}: {obj.process(data)}")
         counter += 1
 
     print("\nFoundation systems online. Nexus ready for advanced streams.")
 
 
 if __name__ == "__main__":
-    ft_stream_processor()
+    main()

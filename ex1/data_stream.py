@@ -7,7 +7,6 @@ class DataStream(ABC):
     def __init__(self, stream_id: str, stream_type: str) -> None:
         self.stream_id: str = stream_id
         self.stream_type: str = stream_type
-        self.count: int = 0
 
     @abstractmethod
     def process_batch(self, data_batch: List[Any]) -> str:
@@ -25,9 +24,7 @@ class DataStream(ABC):
 
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
         return {
-            "stream_id": self.stream_id,
-            "count": self.count,
-            "total": 10.5,
+            "stream_id": self.stream_id
         }
 
 
@@ -92,8 +89,7 @@ class SensorStream(DataStream):
         return {
                 'nb': self.count,
                 'data': self.temperature,
-                'nw': len(self.warnings),
-                'status': "operational"
+                'nw': len(self.warnings)
         }
 
 
@@ -133,9 +129,7 @@ class TransactionStream(DataStream):
         return {
                 'nb': self.count,
                 'data': self.data,
-                'nw': len(self.warnings),
-                'total': 10.5,
-                'status': "operational"
+                'nw': len(self.warnings)
         }
 
 
@@ -164,9 +158,7 @@ class EventStream(DataStream):
         return {
                 'nb': self.count,
                 'twarn': self.twarn,
-                'nw': len(self.warnings),
-                'total': 10.5,
-                'status': "operational"
+                'nw': len(self.warnings)
         }
 
 
@@ -211,20 +203,22 @@ class StreamProcessor:
             criteria
         )
 
-        return [
-            self.safe_process(
-                stream,
-                [
+        results: List[str] = []
+
+        for stream in self.streams:
+            batch: List[Any] = filtered_by_id.get(stream.stream_id, [])
+            if transform is not None:
+                batch = [
                     transform(x) if isinstance(x, str) else x
-                    for x in filtered_by_id.get(stream.stream_id, [])
-                ] if transform is not None
-                else filtered_by_id.get(stream.stream_id, [])
-            )
-            for stream in self.streams
-        ]
+                    for x in batch
+                ]
+            result: str = self.safe_process(stream, batch)
+            results.append(result)
+
+        return results
 
 
-def ft_data_stream() -> None:
+def main() -> None:
     print("=== CODE NEXUS - POLYMORPHIC STREAM SYSTEM ===\n")
 
     print("Initializing Sensor Stream...")
@@ -309,11 +303,9 @@ def ft_data_stream() -> None:
         sensor_hp = s2.filter_data(s2_data, "hp")
         transaction_hp = t2.filter_data(t2_data, "hp")
 
-        print(
-            f"Filtered results: "
-            f"{len(sensor_hp)} critical sensor alerts, "
-            f"{len(transaction_hp)} large transaction"
-        )
+        print(f"Filtered results: "
+              f"{len(sensor_hp)} critical sensor alerts, "
+              f"{len(transaction_hp)} large transaction")
 
         print("\nAll streams processed successfully."
               " Nexus throughout optimal.")
@@ -322,4 +314,4 @@ def ft_data_stream() -> None:
 
 
 if __name__ == "__main__":
-    ft_data_stream()
+    main()
