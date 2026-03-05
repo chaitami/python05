@@ -62,9 +62,9 @@ class SensorStream(DataStream):
 
             self.count = len(data_batch)
 
-            self.warnings = ["Error:" + str(item) for item in temps
+            self.warnings = ["temp out of range: " + str(item) for item in temps
                              if item > 50 or item < -10]
-            self.warnings += ["Error:" + str(item) for item in humidities
+            self.warnings += ["humidity out of range: " + str(item) for item in humidities
                               if item > 60 or item < 30]
 
             parts: List[str] = ([f"temp:{item}" for item in temps
@@ -113,7 +113,7 @@ class TransactionStream(DataStream):
                              if abs(n) > 10000]
             self.count = len(data_batch)
             self.data = sum(allitems)
-            parts: List[str] = [("buy:" if n > 0 else "sell:") + str(n)
+            parts: List[str] = [("buy:" if n > 0 else "sell:") + str(abs(n))
                                 for n in allitems]
             return "[" + ", ".join(parts) + "]"
         except Exception as e:
@@ -136,7 +136,6 @@ class TransactionStream(DataStream):
 class EventStream(DataStream):
     def __init__(self, stream_id: str) -> None:
         super().__init__(stream_id, "System Events")
-        self.twarn: int = 0
         self.count: int = 0
         self.warnings: List[str] = []
 
@@ -157,7 +156,6 @@ class EventStream(DataStream):
     def get_stats(self) -> Dict[str, Union[str, int, float]]:
         return {
                 'nb': self.count,
-                'twarn': self.twarn,
                 'nw': len(self.warnings)
         }
 
@@ -222,15 +220,15 @@ def main() -> None:
     print("=== CODE NEXUS - POLYMORPHIC STREAM SYSTEM ===\n")
 
     print("Initializing Sensor Stream...")
-    SE01 = "SENSOR_001"
-    SS = SensorStream(SE01)
-    s_data = ["temp:22.5", "humidity:65", "pressure:1013"]
+    SE01: str = "SENSOR_001"
+    SS: SensorStream = SensorStream(SE01)
+    s_data: List[str] = ["temp:22.5", "humidity:65", "pressure:1013"]
     print(f"Stream ID: {SE01}, Type: {SS.stream_type}")
     try:
         print("Processing sensor batch: "
               f"{SS.process_batch(s_data)}")
 
-        s_stats = SS.get_stats()
+        s_stats: Dict[str, Union[str, int, float]] = SS.get_stats()
         print("Sensor analysis: "
               f"{s_stats['nb']} readings processed, "
               f"avg temp: {s_stats['data']}°C")
@@ -238,14 +236,14 @@ def main() -> None:
         print(e)
 
     print("\nInitializing Transaction Stream...")
-    TR01 = "TRANS_001"
-    TS = TransactionStream(TR01)
-    t_data = ["buy:100", "sell:150", "buy:75"]
+    TR01: str = "TRANS_001"
+    TS: TransactionStream = TransactionStream(TR01)
+    t_data: List[str] = ["buy:100", "sell:150", "buy:75"]
     print(f"Stream ID: {TR01}, Type: {TS.stream_type}")
     try:
         print("Processing transaction batch: " + TS.process_batch(t_data))
-        t_stats = TS.get_stats()
-        s = '-'
+        t_stats: Dict[str, Union[str, int, float]] = TS.get_stats()
+        s: str = '-'
         if isinstance(t_stats['data'], int) and t_stats['data'] > 0:
             s = '+'
         print("Transaction analysis: "
@@ -255,14 +253,14 @@ def main() -> None:
         print(e)
 
     print("\nInitializing Event Stream...")
-    EV01 = "EVENT_001"
-    ES = EventStream(EV01)
-    e_data = ['login', 'error', 'logout']
+    EV01: str = "EVENT_001"
+    ES: EventStream = EventStream(EV01)
+    e_data: List[str] = ['login', 'error', 'logout']
     print(f"Stream ID: {EV01}, Type: {ES.stream_type}")
     try:
         print(f"Processing event batch: [{', '.join(map(str, e_data))}]")
         ES.process_batch(e_data)
-        e_stats = ES.get_stats()
+        e_stats: Dict[str, Union[str, int, float]] = ES.get_stats()
         print("Event analysis: "
               f"{e_stats['nb']} events, "
               f"{e_stats['nw']} error detected")
@@ -272,20 +270,20 @@ def main() -> None:
     print("\n=== Polymorphic Stream Processing ===")
 
     print("Processing mixed stream types through unified interface...\n")
-    s2_data = ["temp:70", "humidity:70"]
-    t2_data = ["buy:3", "sell:700", "buy:870", "sell:12569"]
-    e2_data = ['login', 'error', 'logout']
+    s2_data: List[str] = ["temp:70", "humidity:70"]
+    t2_data: List[str] = ["buy:3", "sell:700", "buy:870", "sell:12569"]
+    e2_data: List[str] = ['login', 'error', 'logout']
     try:
-        processor = StreamProcessor()
-        s2 = SensorStream("SENSOR_002")
-        t2 = TransactionStream("TRANS_002")
-        e2 = EventStream("EVENT_002")
+        processor: StreamProcessor = StreamProcessor()
+        s2: SensorStream = SensorStream("SENSOR_002")
+        t2: TransactionStream = TransactionStream("TRANS_002")
+        e2: EventStream = EventStream("EVENT_002")
 
         processor.register(s2)
         processor.register(t2)
         processor.register(e2)
 
-        batches = {
+        batches: Dict[str, List[str]] = {
             "SENSOR_002": s2_data,
             "TRANS_002": t2_data,
             "EVENT_002": e2_data,
@@ -300,8 +298,8 @@ def main() -> None:
 
         print("\nStream filtering active: High-priority data only")
 
-        sensor_hp = s2.filter_data(s2_data, "hp")
-        transaction_hp = t2.filter_data(t2_data, "hp")
+        sensor_hp: List[str] = s2.filter_data(s2_data, "hp")
+        transaction_hp: List[str] = t2.filter_data(t2_data, "hp")
 
         print(f"Filtered results: "
               f"{len(sensor_hp)} critical sensor alerts, "
