@@ -1,5 +1,5 @@
 
-from typing import Any
+from typing import Any, List, Dict, Union, Optional
 from abc import ABC, abstractmethod
 
 
@@ -20,7 +20,7 @@ class DataProcessor(ABC):
 class NumericProcessor(DataProcessor):
 
     def process(self, data: Any) -> str:
-        res: str = "An unexpected error occured"
+        res: Optional[str] = "An unexpected error occured"
         try:
             result: str = f"{len(data)} "
             result += f"{sum(data)} "
@@ -30,12 +30,12 @@ class NumericProcessor(DataProcessor):
                 raise Exception(res)
             return res
         except Exception as e:
-            print(e)
+            return f"NumericProcessor error: {e}"
 
     def validate(self, data: Any) -> bool:
         print(f"Processing data: {data}")
         for value in data:
-            if isinstance(value, int) is False:
+            if isinstance(value, (int, float)) is False:
                 return False
         return True
 
@@ -50,7 +50,7 @@ class NumericProcessor(DataProcessor):
 class TextProcessor(DataProcessor):
 
     def process(self, data: Any) -> str:
-        res: str = "An unexpected error occured"
+        res: Optional[str] = "An unexpected error occured"
         try:
             result: str = f"{len(data)} "
             result += f"{len(data.split())}"
@@ -59,7 +59,7 @@ class TextProcessor(DataProcessor):
                 raise Exception(res)
             return res
         except Exception as e:
-            print(e)
+            return f"TextProcessor error: {e}"
 
     def validate(self, data: Any) -> bool:
         print(f'Processing data: "{data}"')
@@ -77,7 +77,7 @@ class TextProcessor(DataProcessor):
 class LogProcessor(DataProcessor):
 
     def process(self, data: Any) -> str:
-        res: str = "An unexpected error occured"
+        res: Optional[str] = "An unexpected error occured"
         try:
 
             res = self.format_output(data)
@@ -85,11 +85,12 @@ class LogProcessor(DataProcessor):
                 raise Exception(res)
             return res
         except Exception as e:
-            print(e)
+            return f"LogProcessor error: {e}"
 
     def validate(self, data: Any) -> bool:
         print(f'Processing data: "{data}"')
-        if data.split()[0] == "ERROR:" or data.split()[0] == "INFO:":
+        if isinstance(data, str) and\
+           (data.split()[0] == "ERROR:" or data.split()[0] == "INFO:"):
             return True
         return False
 
@@ -108,9 +109,9 @@ class LogProcessor(DataProcessor):
 def main() -> None:
     print("=== CODE NEXUS - DATA PROCESSOR FOUNDATION ===\n")
 
-    data1 = [1, 2, 3, 4, 5]
+    data1: List[Union[int, float]] = [1, 2, 3, 4, 5]
     print("Initializing Numeric Processor...")
-    case1 = NumericProcessor()
+    case1: NumericProcessor = NumericProcessor()
     try:
         if case1.validate(data1) is True:
             print("Validation: Numeric data verified")
@@ -121,38 +122,44 @@ def main() -> None:
     except ValueError as e:
         print(e)
 
-    data2 = "Hello Nexus World"
+    data2: str = "Hello Nexus World"
     print("\nInitializing Text Processor...")
-    case2 = TextProcessor()
+    case2: TextProcessor = TextProcessor()
     try:
         if case2.validate(data2) is True:
             print("Validation: Text data verified")
         else:
             raise ValueError("Error: Invalid text data")
-        res = case2.process(data2)
+        res: str = case2.process(data2)
         print(f"Output: {res}")
     except ValueError as e:
         print(e)
 
-    data3 = "ERROR: Connection timeout"
+    data3: str = "ERROR: Connection timeout"
     print("\nInitializing Log Processor...")
-    case3 = LogProcessor()
+    case3: LogProcessor = LogProcessor()
     try:
         if case3.validate(data3) is True:
             print("Validation: Log entry verified")
         else:
             raise ValueError("Error: Invalid log entry")
-        res = case3.process(data3)
+        res: str = case3.process(data3)
         print(f"Output: {res}")
     except ValueError as e:
         print(e)
 
     print("\n=== Polymorphic Processing Demo ===")
-    all = [(NumericProcessor(), [1, 2, 3]),
-           (TextProcessor(), "hello world!"),
-           (LogProcessor(), "INFO: System ready")]
-    counter = 1
-    for obj, data in all:
+    all: List[Dict[str, Any]] = [{"processor": NumericProcessor(),
+                                  "data": [1, 2, 3]},
+                                 {"processor": TextProcessor(),
+                                  "data": "hello world!"},
+                                 {"processor": LogProcessor(),
+                                  "data": "INFO: System ready"}]
+    print("Processing multiple data types through same interface...")
+    counter: int = 1
+    for item in all:
+        obj: DataProcessor = item["processor"]
+        data: Any = item["data"]
         print(f"Result {counter}: {obj.process(data)}")
         counter += 1
 
@@ -160,4 +167,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"An error occurred: {e}")
